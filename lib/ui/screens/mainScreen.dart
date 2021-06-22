@@ -15,8 +15,9 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   String _vpnState = NizVpn.vpnDisconnected;
   List<VpnConfig> _listVpn = [];
-  String dns1, dns2;
-  List<String> _firebaseDnsList = ["1.1.1.1", "2.2.2.2", "3.3.3.3", "4.4.4.4"];
+  List<String> _bypass = ["id.nizwar.open_nizvpn"];
+  String dns1='1.1.1.1', dns2='2.2.2.2';
+  List<String> _firebaseDnsList = ["Dns-1 Settings", "Dns-2 Settings", "Dns-3 Settings", "Dns-4 Settings"];
   VpnConfig _selectedVpn;
 
   @override
@@ -47,7 +48,7 @@ class _MainScreenState extends State<MainScreen> {
         config: await rootBundle.loadString("assets/vpn/us.ovpn"),
         name: _firebaseDnsList[2]));
     _listVpn.add(VpnConfig(
-        config: await rootBundle.loadString("assets/vpn/us.ovpn"),
+        config: await rootBundle.loadString("assets/vpn/japan.ovpn"),
         name: _firebaseDnsList[3]));
     if (mounted)
       setState(() {
@@ -74,7 +75,7 @@ class _MainScreenState extends State<MainScreen> {
                   shape: StadiumBorder(),
                   child: Text(
                     _vpnState == NizVpn.vpnDisconnected
-                        ? "Connect VPN!"
+                        ? "Apply Selected Settings"
                         : _vpnState.replaceAll("_", " ").toUpperCase(),
                     style: TextStyle(color: Colors.white),
                   ),
@@ -108,19 +109,6 @@ class _MainScreenState extends State<MainScreen> {
                           ),
                           onTap: () {
                             if (_selectedVpn == e) return;
-                            if(e.name == "1.1.1.1") {
-                              dns1 = '1.1.1.1';
-                              dns2 = '2.2.2.2';
-                            } else if(e.name == "2.2.2.2") {
-                              dns1 = '3.3.3.3';
-                              dns2 = '4.4.4.4';
-                            } else if(e.name == "3.3.3.3") {
-                              dns1 = '5.5.5.5';
-                              dns2 = '6.6.6.6';
-                            } else {
-                              dns1 = '7.7.7.7';
-                              dns2 = '8.8.8.8';
-                            }
                             log("${e.name} is selected");
                             NizVpn.stopVpn();
                             setState(() {
@@ -141,11 +129,25 @@ class _MainScreenState extends State<MainScreen> {
     ///Stop right here if user not select a vpn
     if (_selectedVpn == null) return;
 
+    if(_selectedVpn.name == "Dns-1 Settings") {
+      dns1 = '1.1.1.1';
+      dns2 = '2.2.2.2';
+    } else if(_selectedVpn.name == "Dns-2 Settings") {
+      dns1 = '1.0.0.1';
+      dns2 = '4.4.4.4';
+    } else if(_selectedVpn.name == "Dns-3 Settings") {
+      dns1 = '5.5.5.5';
+      dns2 = '6.6.6.6';
+    } else {
+      dns1 = '7.7.7.7';
+      dns2 = '8.8.8.8';
+    }
+
     if (_vpnState == NizVpn.vpnDisconnected) {
       ///Start if stage is disconnected
       NizVpn.startVpn(
         _selectedVpn,
-        dns: DnsConfig(dns1, dns2),
+        dns: DnsConfig(dns1, dns2)
       );
     } else {
       ///Stop if stage is "not" disconnected
